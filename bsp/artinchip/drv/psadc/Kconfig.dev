@@ -1,0 +1,25 @@
+
+choice
+    prompt "IO mode"
+        default AIC_PSADC_DRV_INT
+
+    config AIC_PSADC_DRV_INT
+        bool "Enable interrupt mode"
+
+    config AIC_PSADC_DRV_POLL
+        bool "Enable poll mode"
+
+    config AIC_PSADC_DRV_DMA
+        bool "Enable dma mode"
+endchoice
+
+choice
+    prompt "Select trigger source"
+        default AIC_PSADC_TRIG_BY_SOFT
+
+    config AIC_PSADC_TRIG_BY_SOFT
+        bool "Trigger by software"
+
+    config AIC_PSADC_TRIG_BY_EPWM
+        bool "Trigger by EPWM"
+endchoice

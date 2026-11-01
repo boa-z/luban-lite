@@ -1,0 +1,2 @@
+tools/toolchain/*.tar.gz filter=lfs diff=lfs merge=lfs -text
+bsp/peripheral/wireless/realtek/wlan_lib/libwlan_rtl8733_full_c906fd.a filter=lfs diff=lfs merge=lfs -text

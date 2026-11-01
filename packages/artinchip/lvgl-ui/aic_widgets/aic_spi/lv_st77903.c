@@ -1,0 +1,128 @@
+/*
+ * Copyright (C) 2025-2026, ArtInChip Technology Co., Ltd
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Authors:  Zhengcun <zhengcun.chen@artinchip.com>
+ */
+
+#include <rtdevice.h>
+#include "lv_aic_spi.h"
+
+#define ST77903_RST_PIN  "PD.19"
+
+#define SPI_VSW_CMD         (0xD8006100)
+#define SPI_VBP_CMD         (0xD8006000)
+#define SPI_VLD_CMD         (0xDE006000)
+#define SPI_VFP_CMD         (0xD8006000)
+
+#define DATA_MODE_SINGLE    0x0
+#define DATA_MODE_DUAL      0x1
+#define DATA_MODE_QUAD      0x2
+
+static struct drv_spi_display_param disp_param = {
+    .mtw = 0,
+    .vsw_en = 1,
+    .vbp_en = 1,
+    .vfp_en = 1,
+    .len_stride = 400 * 3,
+    .len = 400 * 3,
+    .hvbp = 6,
+    .hvld = 400,
+    .hvfp = 6,
+    .cmd_vsw = SPI_VSW_CMD,
+    .cmd_vbp = SPI_VBP_CMD,
+    .cmd_vld = SPI_VLD_CMD,
+    .cmd_vfp = SPI_VFP_CMD,
+    .count = 60 * 48,
+};
+
+static struct drv_spi_display_config disp_config = {
+    .dma_en = 1,
+    .spi_mode = DATA_MODE_QUAD,
+    .disp_on = 1,
+};
+
+static struct spi_disp_config spi_disp = {
+    .disp_param = &disp_param,
+    .disp_config = &disp_config,
+};
+
+static const struct qspi_disp_priv st77903 = {
+    .spi_disp = &spi_disp,
+    .instruction = {
+        .cmd_content = 0xDE002C00,
+        .flush_content = 0x32002C00,
+        .qspi_lines = 1,
+    },
+    .data_lines = 4,
+};
+
+void lv_qspi_disp_mode_init(struct lv_spi_dev *spi_dev)
+{
+    spi_dev->qspi_disp_mode = true;
+    spi_dev->qspi_priv = &st77903;
+}
+
+static void lv_spi_panel(struct lv_spi_dev *dev)
+{
+    u32 rst_pin;
+
+    rst_pin = rt_pin_get(ST77903_RST_PIN);
+    rt_pin_mode(rst_pin, PIN_MODE_OUTPUT);
+
+    rt_pin_write(rst_pin, 1);
+    rt_thread_mdelay(120);
+
+    lv_spi_write_seq(dev, 0x01);
+    rt_thread_mdelay(120);
+    lv_spi_write_seq(dev, 0xf0, 0xc3);
+    lv_spi_write_seq(dev, 0xf0, 0x96);
+    lv_spi_write_seq(dev, 0xf0, 0xa5);
+    lv_spi_write_seq(dev, 0xe9, 0x20);
+    lv_spi_write_seq(dev, 0xe7, 0x80, 0x77, 0x1f, 0xcc);
+
+    lv_spi_write_seq(dev, 0xc1, 0x77, 0x07, 0xc2, 0x07);
+    lv_spi_write_seq(dev, 0xc2, 0x77, 0x07, 0xc2, 0x07);
+    lv_spi_write_seq(dev, 0xc3, 0x22, 0x02, 0x22, 0x04);
+    lv_spi_write_seq(dev, 0xc4, 0x22, 0x02, 0x22, 0x04);
+    lv_spi_write_seq(dev, 0xc5, 0x71);
+
+    lv_spi_write_seq(dev, 0xe0, 0x87, 0x09, 0x0c, 0x06, 0x05, 0x03, 0x29, 0x32, 0x49, 0x0f, 0x1b, 0x17, 0x2a, 0x2f);
+    lv_spi_write_seq(dev, 0xe1, 0x87, 0x09, 0x0c, 0x06, 0x05, 0x03, 0x29, 0x32, 0x49, 0x0f, 0x1b, 0x17, 0x2a, 0x2f);
+    lv_spi_write_seq(dev, 0xe5, 0xb2, 0xf5, 0xbd, 0x24, 0x22, 0x25, 0x10, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22);
+    lv_spi_write_seq(dev, 0xe6, 0xb2, 0xf5, 0xbd, 0x24, 0x22, 0x25, 0x10, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22);
+    lv_spi_write_seq(dev, 0xec, 0x40, 0x03);
+
+    lv_spi_write_seq(dev, 0x36, 0x04);
+    lv_spi_write_seq(dev, 0x3a, 0x07);
+
+    lv_spi_write_seq(dev, 0xb2, 0x00);
+    lv_spi_write_seq(dev, 0xb3, 0x01);
+    lv_spi_write_seq(dev, 0xb4, 0x00);
+    lv_spi_write_seq(dev, 0xb5, 0x00, 0x08, 0x00, 0x08);
+
+    lv_spi_write_seq(dev, 0xa5, 0x00, 0x00, 0x00, 0x00, 0x20, 0x15, 0x2a, 0x8a, 0x02);
+    lv_spi_write_seq(dev, 0xa6, 0x00, 0x00, 0x00, 0x00, 0x20, 0x15, 0x2a, 0x8a, 0x02);
+
+    lv_spi_write_seq(dev, 0xba, 0x0a, 0x5a, 0x23, 0x10, 0x25, 0x02, 0x00);
+    lv_spi_write_seq(dev, 0xbb, 0x00, 0x2d, 0x00, 0x25, 0x88, 0x87, 0x18, 0x00);
+    lv_spi_write_seq(dev, 0xbc, 0x00, 0x30, 0x00, 0x29, 0x88, 0x87, 0x18, 0x00);
+    lv_spi_write_seq(dev, 0xbd, 0xa1, 0xb2, 0x2b, 0x1a, 0x56, 0x43, 0x34, 0x65, 0xff, 0xff, 0x0f);
+
+    lv_spi_write_seq(dev, 0x35, 0x00);
+    lv_spi_write_seq(dev, 0xb0, 0x5a);
+
+    lv_spi_write_seq(dev, 0x21);
+    lv_spi_write_seq(dev, 0x11);
+    rt_thread_mdelay(120);
+    lv_spi_write_seq(dev, 0x29);
+    rt_thread_mdelay(120);
+}
+
+struct lv_spi_panel_driver lv_spi_st77903 = {
+    .name = "st77903",
+    .enable = lv_spi_panel,
+    .width = 240,
+    .height = 320,
+};
