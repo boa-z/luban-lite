@@ -1,0 +1,24 @@
+# RT-Thread building script for component
+
+Import('AIC_ROOT')
+Import('PRJ_KERNEL')
+Import('rtconfig')
+from building import *
+import os
+
+cwd     = GetCurrentDir()
+src   = []
+group   = []
+
+CPPPATH = [cwd]
+prj_chip = GetDepend('PRJ_CHIP').strip('"')
+
+src     = []
+if GetDepend('AIC_CHIP_D12X') and GetDepend('LPKG_USING_MARC_CHACHA20'):
+    src += Glob('d12x_spienc_secure_boot_port.c')
+if GetDepend('AIC_CHIP_D12P') and GetDepend('AIC_SPIENC_DRV_V20'):
+    src += Glob('d12p_spienc_secure_boot_port.c')
+
+group = DefineGroup('SPIENC_SECURE_BOOT', src, depend = [''], CPPPATH = CPPPATH, LIBS = [], LIBPATH = [])
+
+Return('group')

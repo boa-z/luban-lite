@@ -1,0 +1,20 @@
+Import('AIC_ROOT')
+Import('PRJ_KERNEL')
+from building import *
+
+cwd = GetCurrentDir()
+CPPPATH = []
+src = []
+
+# Two implementations share this directory: test_pbus.c drives the V10 HAL
+# directly (luban-lite 1.0) and test_pbusv2.c uses the handle based driver
+# (luban-lite 2.0). Build exactly one of them.
+if GetDepend('AIC_PBUS_DRV_TEST') and GetDepend('RT_USING_FINSH'):
+    if GetDepend('AIC_PBUS_DRV_V20'):
+        src += Glob('test_pbusv2.c')
+    else:
+        src += Glob('test_pbus.c')
+
+group = DefineGroup('test-pbus', src, depend = [''], CPPPATH = CPPPATH)
+
+Return('group')

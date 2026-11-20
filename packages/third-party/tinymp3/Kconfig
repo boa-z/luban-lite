@@ -1,0 +1,5 @@
+
+menuconfig LPKG_USING_TINYMP3
+    bool "tinymp3: A tiny MP3 encoder library."
+    default n
+

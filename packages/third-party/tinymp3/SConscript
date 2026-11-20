@@ -1,0 +1,11 @@
+from building import *
+
+cwd = GetCurrentDir()
+
+src = Glob('./shine_mp3.c')
+
+
+CPPPATH = [cwd]
+group = DefineGroup('libtinymp3', src, depend = ['LPKG_USING_TINYMP3'], CPPPATH = CPPPATH)
+
+Return('group')

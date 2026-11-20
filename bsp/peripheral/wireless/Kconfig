@@ -1,0 +1,70 @@
+if AIC_WIRELESS_LAN
+    menu "Wireless power & reset pin configuration"
+        config AIC_WIRELESS_PWR_GPIO
+            string "Wlan power on gpio"
+            depends on AIC_WIRELESS_LAN
+
+        config AIC_WIRELESS_BT_PWR_GPIO
+            string "Bt reset gpio"
+            depends on AIC_WIRELESS_LAN
+
+        config AIC_WIRELESS_WIFI_WK_HOST_GPIO
+            string "wifi wakeup host gpio"
+            depends on AIC_WIRELESS_LAN
+
+        config AIC_WIFI_SDMC_ID
+            int "SDMC host index for WiFi chip"
+            depends on AIC_WIRELESS_LAN
+            range 0 2
+            default 1
+    endmenu
+endif
+
+menuconfig AIC_WLAN_REALTEK
+    bool "Using Realtek wlan driver"
+    default n
+    depends on AIC_WIRELESS_LAN
+    select RT_USING_TIMER_SOFT
+    select AIC_USING_REALTEK_WLAN0
+
+    if AIC_WLAN_REALTEK
+    source "bsp/peripheral/wireless/realtek/Kconfig"
+    endif
+
+menuconfig WIFI_USING_SDIOWIFI_ATBM
+    bool "ATBM603X_WIFI"
+    depends on AIC_WIRELESS_LAN
+    select RT_USING_TIMER_SOFT
+    select RT_USING_WIFI
+    select RT_USING_SYSTEM_WORKQUEUE
+    default n
+
+menuconfig AIC_WLAN_ASR
+    bool "Using ASR wlan driver"
+    default n
+    depends on AIC_WIRELESS_LAN
+    select RT_USING_TIMER_SOFT
+    select RT_USING_WIFI
+    select RT_USING_SYSTEM_WORKQUEUE
+    select LPKG_USING_MBEDTLS
+
+menuconfig AIC_WLAN_AIC8800D40L
+    bool "AIC8800 wlan driver"
+    default n
+    depends on AIC_WIRELESS_LAN
+    select LPKG_USING_MBEDTLS
+    if AIC_WLAN_AIC8800D40L
+    source "bsp/peripheral/wireless/aic8800/Kconfig.dev"
+    ##source "bsp/peripheral/wireless/aic8800/Kconfig.drv"
+    endif
+
+menuconfig AIC_WLAN_HUGEIC
+    bool "HUGEIC wlan driver"
+    default n
+    depends on AIC_WIRELESS_LAN
+    select RT_USING_TIMER_SOFT
+    select RT_USING_WIFI
+    select RT_USING_SYSTEM_WORKQUEUE
+    if AIC_WLAN_HUGEIC
+    source "bsp/peripheral/wireless/hugeic/Kconfig"
+    endif

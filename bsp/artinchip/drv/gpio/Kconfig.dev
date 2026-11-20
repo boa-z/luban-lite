@@ -1,0 +1,20 @@
+#-----------------------------
+# devices local parameter
+#-----------------------------
+
+config AIC_GPIO_ALWAYS_ON
+    bool
+    default y
+    select AIC_USING_GPIO
+
+config AIC_USING_GPIO
+    bool "Using GPIO"
+    default y
+    select AIC_GPIO_DRV
+
+menu "GPIO Parameter"
+    config AIC_GPIO_IRQ_DRV_EN
+        bool "support gpio irq register"
+        default n
+        depends on AIC_USING_GPIO
+endmenu
